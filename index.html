@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election DAPP</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <!-- css stylesheet    -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- font awesome -->
+    <script src="https://use.fontawesome.com/releases/v5.15.2/js/all.js" data-auto-a11y="true"></script>
+    <!-- google fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@1,700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <h1 id="ElectionName"></h1>
+    <h2 class="live">*LIVE</h2>
+
+    <img src="images\—Pngtree—vote like_5419467.png" alt="">
+
+
+
+    <div id="chart" style="width: 800px; height: 400px;"></div>
+
+    <div class="voting-section">
+        <div class="booth">
+            <i class="fas fa-person-booth"></i> Booth
+        </div>
+        <div class="row">
+            <label for="pvtkey">Node address:</label>
+            <input type="text" id="pvtkey" name="pvtkey" placeholder="ENTER YOUR ADDRESS">
+        </div>
+
+        <div class="row">
+            <label class="row" for="votedto">Select Candidate:</label>
+            <select class="row" id="votedto">
+                <option value="0">Candidate-1(Party)</option>
+                <option value="1">Candidate-2(Party)</option>
+                <option value="2">Candidate-3(Party)</option>
+            </select>
+        </div>
+
+        <div class="row" id="btn">
+            <button id="vote"><span id="vote-text">Vote</span><i class="fas fa-vote-yea fa-lg"></i></button>
+        </div>
+
+
+
+
+
+    </div>
+
+    <!-- jQuery   -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- javascipt -->
+    <!-- <script type="text/javascript" src="app.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.4/web3.min.js"></script>
+
+    <script>
+        var contract;
+        var owner;
+        var result = NaN;
+        var election_name;
+        var number_of_candidates;
+        var candidates = [];
+
+        var web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8545");
+
+        const abi = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_pollName",
+                        "type": "string"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_candidate",
+                        "type": "string"
+                    }
+                ],
+                "name": "addCandidate",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_new_person",
+                        "type": "address"
+                    }
+                ],
+                "name": "authorize",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "candidates",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "vote_count",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "end_polling",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "number_of_candidates",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [
+                    {
+                        "internalType": "address payable",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "pollName",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "total_votes_polled",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_index_of_candidate",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "upvote",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "voters",
+                "outputs": [
+                    {
+                        "internalType": "bool",
+                        "name": "authorized",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "voted",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "vote_to",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ]
+        const address = "0xD608405f55d99bcF2C51B9D1f33169090b041494";
+
+        contract = new web3.eth.Contract(abi, address);
+
+        web3.eth.getAccounts().then((accounts) => {
+            owner = accounts[0];
+        });
+
+        async function fetch() {
+            result = await contract.methods.pollName().call();
+            election_name = result;
+            $("#ElectionName").html(election_name);
+
+
+            result = await contract.methods.number_of_candidates().call();
+            console.log(result);
+            number_of_candidates = result;
+
+
+            var helper;
+
+            var helper_arr;
+            var main_arr = [];
+
+
+            async function fetch_candi() {
+
+                for (var i = 0; i < number_of_candidates; i++) {
+                    helper = await contract.methods.candidates([i]).call();
+
+                    helper_arr = [];
+                    helper_arr.push(helper.name.toString());
+                    helper_arr.push(parseInt(helper.vote_count));
+                    main_arr.push(helper_arr);
+                }
+
+
+            }
+
+            fetch_candi().then(() => {
+
+                var label = ['Candidates', 'Votes'];
+                main_arr.unshift(label);
+
+                var test_arr = [['Candidates', 'Votes', { role: 'style' }],
+                ['Ashhar', 1, '#b87333'],
+                ['Saif', 3, 'silver']]
+
+                google.charts.load('current', { 'packages': ['bar'] });
+                google.charts.setOnLoadCallback(drawChart);
+
+                function drawChart() {
+                    var data = google.visualization.arrayToDataTable(main_arr);
+
+                    var options = {
+                        chart: {
+                            title: election_name,
+                            
+                        }
+
+                    };
+
+                    var chart = new google.charts.Bar(document.getElementById('chart'));
+
+                    chart.draw(data, google.charts.Bar.convertOptions(options));
+
+
+                }
+            });
+        }
+
+        fetch();
+
+
+
+        $("#vote").click(function () {
+
+            alert("Congrats!! your vote is counted. Refresh to view updated Results");
+            var node_address = $("#pvtkey").val();
+            var candidate_index = $("#votedto").val();
+
+            contract.methods.authorize(node_address).send({ from: owner }).then(() => {
+                contract.methods.upvote(candidate_index).send({ from: node_address }).then((receipt) => {
+                    console.log(receipt);
+                    window.location.reload();
+                });
+            });
+        });
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>

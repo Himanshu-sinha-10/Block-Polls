@@ -1,0 +1,102 @@
+body {
+    font-family: 'Ubuntu', sans-serif;
+}
+
+
+#chart {
+    border: 5px solid rgb(46, 46, 46);
+    border-radius: 10px;
+    margin: 30px auto;
+    height: 50vh !important;
+    width: 50vw !important;
+    padding:50px;
+
+
+    
+    
+}
+
+ #ElectionName {
+    text-align: center;
+    /* background-color: #1597bb; */
+    background-color: rgb(66, 133, 244);
+    margin:0;
+    padding:50px;
+    font-size: 100px;
+    color:#f3f4ed;
+}
+
+
+
+.voting-section {
+    
+    position: relative;
+    border: 2px solid black;
+    border-radius: 5px;
+    width:500px;
+    margin: 0 auto;
+    align-items: center;
+
+}
+
+.row{
+    
+    padding: 5px;
+    margin:5px auto;
+    
+
+}
+
+#btn {
+    text-align: center;
+}
+
+#vote{
+    font-family: 'Ubuntu', sans-serif;
+    width:100%;
+    padding:4px;
+    background-color: rgb(66, 133, 244);
+    font-size: 30px;
+    border-radius: 5px;
+    color:#f3f4ed;
+    opacity: 0.8;
+
+}
+
+#vote:hover{
+    opacity: 1;
+}
+
+input {
+    padding: 4px;
+}
+
+#vote-text {
+    margin:5px;
+
+}
+
+.live {
+    text-align:center;
+    font-weight: 200;
+    color:red;
+}
+
+img { 
+    width:200px;
+    position:absolute;
+    height:300px;
+}
+
+.booth {
+    position: absolute;
+    right:10px;
+    top:10px;
+    margin:0 !important;
+    font-size: 30px;
+}
+
+label{
+    font-size: 18px;
+}
+
